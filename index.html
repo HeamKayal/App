@@ -1,199 +1,205 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Water Quality Calculator with Excel Export</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            max-width: 1000px;
-            margin: auto;
-            background-color: #f2f9ff;
-        }
-        h1 {
-            text-align: center;
-        }
-        label, input {
-            display: block;
-            margin: 10px 0;
-            width: 100%;
-        }
-        input[type="number"] {
-            padding: 8px;
-        }
-        button {
-            margin-top: 10px;
-            padding: 10px;
-            width: 100%;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            font-size: 16px;
-        }
-        .results {
-            margin-top: 20px;
-            background: #e8f4fd;
-            padding: 15px;
-            border-radius: 5px;
-        }
-        .results div {
-            margin: 5px 0;
-        }
-        table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Stack Emission Calculator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1000px;
+      margin: 30px auto;
+      background-color: #eef6fb;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    .grid-container {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .column {
+      flex: 1;
+      padding: 15px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+
+    label {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+    }
+
+    .result-box {
+      background-color: #f4fbf4;
+      font-weight: bold;
+      padding: 8px;
+      margin-bottom: 12px;
+    }
+
+    button {
+      display: block;
+      margin: 20px auto;
+      padding: 12px 24px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 30px;
+      border-collapse: collapse;
+      background: #fff;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #d4ebff;
+    }
+
+  </style>
 </head>
 <body>
 
-<h1>Water Quality Calculator</h1>
+<h2>Stack Emission Calculator (g/day)</h2>
 
-<label for="ec">Electrical Conductivity (EC) in S/cm:</label>
-<input type="number" id="ec" placeholder="Enter EC value" step="any">
+<div class="grid-container">
+  <!-- Input Section -->
+  <div class="column">
+    <h3>Input Values</h3>
+    <label for="pm">Particulate Matter (mg/Nm³):</label>
+    <input type="number" id="pm" step="any">
 
-<button id="calculateBtn">Calculate Parameters</button>
-<button id="downloadBtn" style="display:none;">Download All Results as Excel</button>
+    <label for="sox">SOx (mg/Nm³):</label>
+    <input type="number" id="sox" step="any">
 
-<div class="results" id="results" style="display:none;">
-    <h3>Results:</h3>
-    <div id="tds"></div>
-    <div id="chloride"></div>
-    <div id="sulphate"></div>
-    <div id="alkalinity"></div>
-    <div id="sodium"></div>
-    <div id="potassium"></div>
-    <div id="silica"></div>
-    <div id="nitrate"></div>
-    <div id="hardness"></div>
-    <div id="calcium"></div>
-    <div id="magnesium"></div>
+    <label for="nox">NOx (mg/Nm³):</label>
+    <input type="number" id="nox" step="any">
+
+    <label for="flow">Flow Rate (Nm³/hr):</label>
+    <input type="number" id="flow" step="any">
+  </div>
+
+  <!-- Output Section -->
+  <div class="column">
+    <h3>Calculated Emission (g/day)</h3>
+    <label>PM Emission:</label>
+    <div id="pmResult" class="result-box">—</div>
+
+    <label>SOx Emission:</label>
+    <div id="soxResult" class="result-box">—</div>
+
+    <label>NOx Emission:</label>
+    <div id="noxResult" class="result-box">—</div>
+  </div>
 </div>
 
-<h3>Previous Entries:</h3>
-<table id="resultTable">
-    <thead>
-        <tr>
-            <th>S.No</th>
-            <th>Sample Code</th>
-            <th>TDS (mg/L)</th>
-            <th>Chloride (mg/L)</th>
-            <th>Sulphate (mg/L)</th>
-            <th>Total Alkalinity (mg/L)</th>
-            <th>Sodium (mg/L)</th>
-            <th>Potassium (mg/L)</th>
-            <th>Silica (mg/L)</th>
-            <th>Nitrate (mg/L)</th>
-            <th>Total Hardness (mg/L)</th>
-            <th>Calcium (mg/L)</th>
-            <th>Magnesium (mg/L)</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Entries will be added here -->
-    </tbody>
+<!-- Buttons -->
+<button onclick="calculate()">Calculate</button>
+<button onclick="downloadExcel()">Download Excel</button>
+
+<!-- Previous Results Table -->
+<h3>Previous Results</h3>
+<table id="resultsTable">
+  <thead>
+    <tr>
+      <th>S.No</th>
+      <th>PM (mg/Nm³)</th>
+      <th>SOx (mg/Nm³)</th>
+      <th>NOx (mg/Nm³)</th>
+      <th>Flow (Nm³/hr)</th>
+      <th>PM Emission (g/day)</th>
+      <th>SOx Emission (g/day)</th>
+      <th>NOx Emission (g/day)</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
 </table>
 
 <script>
-    let resultData = [];
-    let entryCount = 0;
+  let resultsData = [];
+  let count = 0;
 
-    function calculate() {
-        const ec = parseFloat(document.getElementById("ec").value);
-        const sampleCode = `Sample${entryCount + 1}`;
+  function calculate() {
+    const pm = parseFloat(document.getElementById("pm").value);
+    const sox = parseFloat(document.getElementById("sox").value);
+    const nox = parseFloat(document.getElementById("nox").value);
+    const flow = parseFloat(document.getElementById("flow").value);
 
-        if (isNaN(ec) || ec <= 0) {
-            alert("Please enter a valid EC value.");
-            return;
-        }
-
-        const tds = ec * 0.65;
-        const chloride = tds * 0.36;
-        const sulphate = tds * 0.23;
-        const alkalinity = tds * 0.32;
-        const sodium = chloride * 0.43;
-        const potassium = sodium * 0.25;
-        const silica = sodium * 0.18;
-
-        const nitrate = tds * 0.12;
-        const hardness = tds * 0.38;
-        const calcium = hardness * 0.55;
-        const magnesium = hardness - calcium;
-
-        document.getElementById("results").style.display = "block";
-        document.getElementById("downloadBtn").style.display = "block";
-
-        document.getElementById("tds").innerText = `TDS: ${tds.toFixed(2)} mg/L`;
-        document.getElementById("chloride").innerText = `Chloride: ${chloride.toFixed(2)} mg/L`;
-        document.getElementById("sulphate").innerText = `Sulphate: ${sulphate.toFixed(2)} mg/L`;
-        document.getElementById("alkalinity").innerText = `Total Alkalinity: ${alkalinity.toFixed(2)} mg/L`;
-        document.getElementById("sodium").innerText = `Sodium: ${sodium.toFixed(2)} mg/L`;
-        document.getElementById("potassium").innerText = `Potassium: ${potassium.toFixed(2)} mg/L`;
-        document.getElementById("silica").innerText = `Silica: ${silica.toFixed(2)} mg/L`;
-        document.getElementById("nitrate").innerText = `Nitrate: ${nitrate.toFixed(2)} mg/L`;
-        document.getElementById("hardness").innerText = `Total Hardness: ${hardness.toFixed(2)} mg/L`;
-        document.getElementById("calcium").innerText = `Calcium: ${calcium.toFixed(2)} mg/L`;
-        document.getElementById("magnesium").innerText = `Magnesium: ${magnesium.toFixed(2)} mg/L`;
-
-        entryCount++;
-        const tableBody = document.getElementById("resultTable").getElementsByTagName("tbody")[0];
-        const newRow = tableBody.insertRow();
-
-        newRow.insertCell(0).innerText = entryCount;
-        newRow.insertCell(1).innerText = sampleCode;
-        newRow.insertCell(2).innerText = tds.toFixed(2);
-        newRow.insertCell(3).innerText = chloride.toFixed(2);
-        newRow.insertCell(4).innerText = sulphate.toFixed(2);
-        newRow.insertCell(5).innerText = alkalinity.toFixed(2);
-        newRow.insertCell(6).innerText = sodium.toFixed(2);
-        newRow.insertCell(7).innerText = potassium.toFixed(2);
-        newRow.insertCell(8).innerText = silica.toFixed(2);
-        newRow.insertCell(9).innerText = nitrate.toFixed(2);
-        newRow.insertCell(10).innerText = hardness.toFixed(2);
-        newRow.insertCell(11).innerText = calcium.toFixed(2);
-        newRow.insertCell(12).innerText = magnesium.toFixed(2);
-
-        resultData.push({
-            "S.No": entryCount,
-            "Sample Code": sampleCode,
-            "TDS (mg/L)": tds.toFixed(2),
-            "Chloride (mg/L)": chloride.toFixed(2),
-            "Sulphate (mg/L)": sulphate.toFixed(2),
-            "Total Alkalinity (mg/L)": alkalinity.toFixed(2),
-            "Sodium (mg/L)": sodium.toFixed(2),
-            "Potassium (mg/L)": potassium.toFixed(2),
-            "Silica (mg/L)": silica.toFixed(2),
-            "Nitrate (mg/L)": nitrate.toFixed(2),
-            "Total Hardness (mg/L)": hardness.toFixed(2),
-            "Calcium (mg/L)": calcium.toFixed(2),
-            "Magnesium (mg/L)": magnesium.toFixed(2)
-        });
+    if (isNaN(pm) || isNaN(sox) || isNaN(nox) || isNaN(flow) || flow <= 0) {
+      alert("Please enter valid numbers in all fields.");
+      return;
     }
 
-    function downloadExcel() {
-        if (resultData.length === 0) {
-            alert("No results to download.");
-            return;
-        }
+    const factor = flow * 24 / 1_000_000;
+    const pmEmission = (pm * factor).toFixed(2);
+    const soxEmission = (sox * factor).toFixed(2);
+    const noxEmission = (nox * factor).toFixed(2);
 
-        const worksheet = XLSX.utils.json_to_sheet(resultData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Water Quality Results");
-        XLSX.writeFile(workbook, "Water_Quality_Results.xlsx");
+    // Display result
+    document.getElementById("pmResult").innerText = `${pmEmission} g/day`;
+    document.getElementById("soxResult").innerText = `${soxEmission} g/day`;
+    document.getElementById("noxResult").innerText = `${noxEmission} g/day`;
+
+    // Store in table
+    count++;
+    const row = document.getElementById("resultsTable").getElementsByTagName("tbody")[0].insertRow();
+    row.insertCell(0).innerText = count;
+    row.insertCell(1).innerText = pm;
+    row.insertCell(2).innerText = sox;
+    row.insertCell(3).innerText = nox;
+    row.insertCell(4).innerText = flow;
+    row.insertCell(5).innerText = pmEmission;
+    row.insertCell(6).innerText = soxEmission;
+    row.insertCell(7).innerText = noxEmission;
+
+    // Save to data array
+    resultsData.push({
+      "S.No": count,
+      "PM (mg/Nm³)": pm,
+      "SOx (mg/Nm³)": sox,
+      "NOx (mg/Nm³)": nox,
+      "Flow (Nm³/hr)": flow,
+      "PM Emission (g/day)": pmEmission,
+      "SOx Emission (g/day)": soxEmission,
+      "NOx Emission (g/day)": noxEmission
+    });
+  }
+
+  function downloadExcel() {
+    if (resultsData.length === 0) {
+      alert("No data to export!");
+      return;
     }
-
-    document.getElementById("calculateBtn").onclick = calculate;
-    document.getElementById("downloadBtn").onclick = downloadExcel;
+    const ws = XLSX.utils.json_to_sheet(resultsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Emission Results");
+    XLSX.writeFile(wb, "Emission_Results.xlsx");
+  }
 </script>
 
 </body>
