@@ -8,7 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
-            max-width: 800px;
+            max-width: 1000px;
             margin: auto;
             background-color: #f2f9ff;
         }
@@ -59,7 +59,7 @@
 
 <h1>Water Quality Calculator</h1>
 
-<label for="ec">Electrical Conductivity (EC) in µS/cm:</label>
+<label for="ec">Electrical Conductivity (EC) in S/cm:</label>
 <input type="number" id="ec" placeholder="Enter EC value" step="any">
 
 <button id="calculateBtn">Calculate Parameters</button>
@@ -74,6 +74,10 @@
     <div id="sodium"></div>
     <div id="potassium"></div>
     <div id="silica"></div>
+    <div id="nitrate"></div>
+    <div id="hardness"></div>
+    <div id="calcium"></div>
+    <div id="magnesium"></div>
 </div>
 
 <h3>Previous Entries:</h3>
@@ -89,6 +93,10 @@
             <th>Sodium (mg/L)</th>
             <th>Potassium (mg/L)</th>
             <th>Silica (mg/L)</th>
+            <th>Nitrate (mg/L)</th>
+            <th>Total Hardness (mg/L)</th>
+            <th>Calcium (mg/L)</th>
+            <th>Magnesium (mg/L)</th>
         </tr>
     </thead>
     <tbody>
@@ -100,17 +108,15 @@
     let resultData = [];
     let entryCount = 0;
 
-    // Function to perform calculations based on the EC value entered
     function calculate() {
         const ec = parseFloat(document.getElementById("ec").value);
-        const sampleCode = `Sample${entryCount + 1}`; // Unique Sample Code for each entry
+        const sampleCode = `Sample${entryCount + 1}`;
 
         if (isNaN(ec) || ec <= 0) {
             alert("Please enter a valid EC value.");
             return;
         }
 
-        // Perform calculations
         const tds = ec * 0.65;
         const chloride = tds * 0.36;
         const sulphate = tds * 0.23;
@@ -119,7 +125,11 @@
         const potassium = sodium * 0.25;
         const silica = sodium * 0.18;
 
-        // Update display with the calculated values
+        const nitrate = tds * 0.12;
+        const hardness = tds * 0.38;
+        const calcium = hardness * 0.55;
+        const magnesium = hardness - calcium;
+
         document.getElementById("results").style.display = "block";
         document.getElementById("downloadBtn").style.display = "block";
 
@@ -130,13 +140,15 @@
         document.getElementById("sodium").innerText = `Sodium: ${sodium.toFixed(2)} mg/L`;
         document.getElementById("potassium").innerText = `Potassium: ${potassium.toFixed(2)} mg/L`;
         document.getElementById("silica").innerText = `Silica: ${silica.toFixed(2)} mg/L`;
+        document.getElementById("nitrate").innerText = `Nitrate: ${nitrate.toFixed(2)} mg/L`;
+        document.getElementById("hardness").innerText = `Total Hardness: ${hardness.toFixed(2)} mg/L`;
+        document.getElementById("calcium").innerText = `Calcium: ${calcium.toFixed(2)} mg/L`;
+        document.getElementById("magnesium").innerText = `Magnesium: ${magnesium.toFixed(2)} mg/L`;
 
-        // Add entry to the result table
         entryCount++;
         const tableBody = document.getElementById("resultTable").getElementsByTagName("tbody")[0];
         const newRow = tableBody.insertRow();
 
-        // Add cells to the new row
         newRow.insertCell(0).innerText = entryCount;
         newRow.insertCell(1).innerText = sampleCode;
         newRow.insertCell(2).innerText = tds.toFixed(2);
@@ -146,8 +158,11 @@
         newRow.insertCell(6).innerText = sodium.toFixed(2);
         newRow.insertCell(7).innerText = potassium.toFixed(2);
         newRow.insertCell(8).innerText = silica.toFixed(2);
+        newRow.insertCell(9).innerText = nitrate.toFixed(2);
+        newRow.insertCell(10).innerText = hardness.toFixed(2);
+        newRow.insertCell(11).innerText = calcium.toFixed(2);
+        newRow.insertCell(12).innerText = magnesium.toFixed(2);
 
-        // Store data for Excel export
         resultData.push({
             "S.No": entryCount,
             "Sample Code": sampleCode,
@@ -157,11 +172,14 @@
             "Total Alkalinity (mg/L)": alkalinity.toFixed(2),
             "Sodium (mg/L)": sodium.toFixed(2),
             "Potassium (mg/L)": potassium.toFixed(2),
-            "Silica (mg/L)": silica.toFixed(2)
+            "Silica (mg/L)": silica.toFixed(2),
+            "Nitrate (mg/L)": nitrate.toFixed(2),
+            "Total Hardness (mg/L)": hardness.toFixed(2),
+            "Calcium (mg/L)": calcium.toFixed(2),
+            "Magnesium (mg/L)": magnesium.toFixed(2)
         });
     }
 
-    // Function to trigger Excel file download
     function downloadExcel() {
         if (resultData.length === 0) {
             alert("No results to download.");
@@ -171,12 +189,9 @@
         const worksheet = XLSX.utils.json_to_sheet(resultData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Water Quality Results");
-
-        // Trigger file download
         XLSX.writeFile(workbook, "Water_Quality_Results.xlsx");
     }
 
-    // Fix for button functionality
     document.getElementById("calculateBtn").onclick = calculate;
     document.getElementById("downloadBtn").onclick = downloadExcel;
 </script>
